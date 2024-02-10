@@ -2,13 +2,14 @@ package config
 
 import (
 	"crypto/tls"
-	"github.com/liberal-boy/tls-shunt-proxy/config/raw"
-	"github.com/liberal-boy/tls-shunt-proxy/handler"
-	"github.com/liberal-boy/tls-shunt-proxy/handler/http2"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 	"strings"
+
+	"github.com/amirdaaee/tls-shunt-proxy/config/raw"
+	"github.com/amirdaaee/tls-shunt-proxy/handler"
+	"github.com/amirdaaee/tls-shunt-proxy/handler/http2"
+	"gopkg.in/yaml.v2"
 )
 
 type (

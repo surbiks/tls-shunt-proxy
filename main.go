@@ -4,13 +4,14 @@ import (
 	"crypto/tls"
 	"flag"
 	"fmt"
-	"github.com/liberal-boy/tls-shunt-proxy/config"
-	"github.com/liberal-boy/tls-shunt-proxy/handler"
-	"github.com/liberal-boy/tls-shunt-proxy/sniffer"
-	"github.com/stevenjohnstone/sni"
 	"log"
 	"net"
 	"strings"
+
+	"github.com/amirdaaee/tls-shunt-proxy/config"
+	"github.com/amirdaaee/tls-shunt-proxy/handler"
+	"github.com/amirdaaee/tls-shunt-proxy/sniffer"
+	"github.com/stevenjohnstone/sni"
 )
 
 const version = "0.8.1"

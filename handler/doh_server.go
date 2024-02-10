@@ -1,16 +1,17 @@
 package handler
 
 import (
-	"github.com/dvsekhvalnov/jose2go/base64url"
-	D "github.com/liberal-boy/tls-shunt-proxy/handler/dns"
-	"github.com/miekg/dns"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
 	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
 	"strings"
+
+	D "github.com/amirdaaee/tls-shunt-proxy/handler/dns"
+	"github.com/dvsekhvalnov/jose2go/base64url"
+	"github.com/miekg/dns"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 )
 
 type DohServer struct {
