@@ -9,7 +9,7 @@ Used for shunting TLS traffic, suitable for vmess + TLS + Web solutions, and can
 ## Download and Installation
 For linux-amd64, you can use the script installation. Execute the following command as root:
 ```shell
-bash <(curl -L -s https://raw.githubusercontent.com/surbiks/tls-shunt-proxy/master/dist/install.sh)
+bash <(curl -L -s https://raw.githubusercontent.com/surbiks/tls-shunt-proxy/master/scripts/install.sh)
 ```
 * Configuration file is located at `/etc/tls-shunt-proxy/config.yaml`
 

@@ -4,3 +4,4 @@ config.yaml
 ocsp/
 
 storage/cert/
+build/
