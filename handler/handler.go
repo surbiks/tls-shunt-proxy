@@ -10,7 +10,7 @@ type Handler interface {
 	Handle(conn net.Conn)
 }
 
-func DefaultGzipHandler() *gzip.Handler{
+func DefaultGzipHandler() *gzip.Handler {
 	return gzip.NewHandler(gzip.Config{
 		CompressionLevel: gzip.BestSpeed,
 		MinContentLength: 1 * 1024,

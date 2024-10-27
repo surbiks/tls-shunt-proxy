@@ -1,151 +1,148 @@
-# TLS 分流器
-[Telegram](https://t.me/tls_shunt_proxy)
+# TLS Shunt Proxy
 
-用于分流 TLS 流量，适用于 vmess + TLS + Web 方案实现，并可以与 trojan 共享端口。
-* sni 分流
-* http 和无特征流量分流
-* 静态网站服务器
-* 自动获取证书
+Used for shunting TLS traffic, suitable for vmess + TLS + Web solutions, and can share ports with Trojan.
+* SNI Shunting
+* HTTP and Unspecified Traffic Shunting
+* Static Website Server
+* Automatic Certificate Acquisition
 
-## 下载安装
-对于 linux-amd64 可以使用脚本安装，以 root 身份执行以下命令
-```shell script
-bash <(curl -L -s https://raw.githubusercontent.com/liberal-boy/tls-shunt-proxy/master/dist/install.sh)
+## Download and Installation
+For linux-amd64, you can use the script installation. Execute the following command as root:
+```shell
+bash <(curl -L -s https://raw.githubusercontent.com/surbiks/tls-shunt-proxy/master/dist/install.sh)
 ```
-* 配置文件位于 `/etc/tls-shunt-proxy/config.yaml`
+* Configuration file is located at `/etc/tls-shunt-proxy/config.yaml`
 
-* 其他平台需自行编译安装
+* Other platforms need to compile and install manually.
 
-## 使用
-命令行参数：
+## Usage
+Command line parameters:
 ```
   -config string
         Path to config file (default "./config.yaml")
 ```
 
 <details>
-  <summary>点击此处展开示例配置文件</summary>
+  <summary>Click here to expand the example configuration file</summary>
   
 ```yml
-# listen: 监听地址
+# listen: Listening address
 listen: 0.0.0.0:443
 
-# redirecthttps: 监听一个地址，发送到这个地址的 http 请求将被重定向到 https
+# redirecthttps: Listening for an address, HTTP requests sent to this address will be redirected to HTTPS
 redirecthttps: 0.0.0.0:80
 
-# inboundbuffersize: 入站缓冲区大小，单位 KB, 默认值 4
-# 相同吞吐量和连接数情况下，缓冲区越大，消耗的内存越大，消耗 CPU 时间越少。在网络吞吐量较低时，缓存过大可能增加延迟。
+# inboundbuffersize: Inbound buffer size in KB, default is 4
+# With the same throughput and connection count, a larger buffer consumes more memory and less CPU time. A large cache may increase latency in cases of low network throughput.
 inboundbuffersize: 4
 
-# outboundbuffersize: 出站缓冲区大小，单位 KB, 默认值 32
+# outboundbuffersize: Outbound buffer size in KB, default is 32
 outboundbuffersize: 32
 
-# vhosts: 按照按照 tls sni 扩展划分为多个虚拟 host
+# vhosts: Divided into multiple virtual hosts based on the TLS SNI extension
 vhosts:
 
-    # name 对应 tls sni 扩展的 server name
+    # name corresponds to the server name in the TLS SNI extension
   - name: vmess.example.com
 
-    # tlsoffloading: 解开 tls，true 为解开，解开后可以识别 http 流量，适用于 vmess over tls 和 http over tls (https) 分流等
+    # tlsoffloading: Unload TLS, true to unload, which can identify HTTP traffic, suitable for vmess over TLS and HTTP over TLS (HTTPS) shunting, etc.
     tlsoffloading: true
 
-    # managedcert: 管理证书，开启后将自动从 LetsEncrypt 获取证书，根据 LetsEncrypt 的要求，必须监听 443 端口才能签发
-    # 开启时 cert 和 key 设置的证书无效，关闭时将使用 cert 和 key 设置的证书
+    # managedcert: Manage certificates, when enabled, will automatically acquire a certificate from Let's Encrypt. To get issued, it must listen on port 443 according to Let's Encrypt requirements.
+    # When enabled, the cert and key set certificates are invalid; when disabled, the cert and key configured certificates will be used.
     managedcert: false
 
-    # keytype: 启用 managedcert 时，生成的密钥对类型，支持的选项 ed25519、p256、p384、rsa2048、rsa4096、rsa8192
+    # keytype: Key pair type generated when managedcert is enabled. Supported options: ed25519, p256, p384, rsa2048, rsa4096, rsa8192
     keytype: p256
 
-    # cert: tls 证书路径，
+    # cert: Path to the TLS certificate,
     cert: /etc/ssl/vmess.example.com.pem
 
-    # key: tls 私钥路径
+    # key: Path to the TLS private key
     key: /etc/ssl/vmess.example.com.key
 
-    # alpn: ALPN, 多个 next protocol 之间用 "," 分隔
+    # alpn: ALPN, separate multiple next protocols with ","
     alpn: h2,http/1.1
 
-    # protocols: 指定 tls 协议版本，格式为 min,max , 可用值 tls12(默认最小), tls13(默认最大)
-    # 如果最小值和最大值相同，那么你只需要写一次
-    # tls12 仅支持 FS 且 AEAD 的加密套件
+    # protocols: Specify TLS protocol version in the format min,max, available values are tls12 (default min), tls13 (default max)
+    # If min and max are the same, you only need to write it once.
+    # tls12 only supports FS and AEAD cipher suites.
     protocols: tls12,tls13
 
-    # http: 识别出的 http 流量的处理方式
+    # http: Handling of identified HTTP traffic
     http:
 
-      # paths: 按 http 请求的 path 分流，从上到下匹配，找不到匹配项则使用 http 的 handler
-      paths:
-
-          # path: path 以该字符串开头的请求将应用此 handler
+      # paths: Shunt based on HTTP request paths, matching from top to bottom. If no matches are found, the HTTP handler will be used.
+      # path: Requests with this string prefix will apply this handler
         - path: /vmess/ws/
           handler: proxyPass
           args: 127.0.0.1:40000
 
-          # path: http/2 请求的 path 将被识别为 *
+          # path: HTTP/2 requests will be recognized as *
         - path: "*"
           handler: proxyPass
           args: 127.0.0.1:40003
 
         - path: /static/
 
-          # trimprefix: 修剪前缀，将 http 流量交给 handler 时，修剪 path 中的前缀
-          # 如将 /static/logo.jpg 修剪为 /logo.jpg
+          # trimprefix: Trim the prefix, when handing HTTP traffic to the handler, it will trim the prefix from the path.
+          # For example, it will trim /static/logo.jpg to /logo.jpg
           trimprefix: /static
 
           handler: fileServer
           args: /var/www/static
 
-      # handler: fileServer 将服务一个静态网站
-      # fileServer 支持 h2c, 如果使用 fileServer 处理 http, 且未设置 paths, alpn 可以开启 h2
+      # handler: fileServer will serve a static website
+      # fileServer supports h2c. If using fileServer to handle HTTP, and no paths are set, alpn can enable h2.
       handler: fileServer
 
-      # args: 静态网站的文件路径
+      # args: Path to the static website files
       args: /var/www/html
       
-    # http/2 请求的处理方式，当此项设置后，http 中的 path: "*" 设置将无效
+    # HTTP/2 request handling method. When this is set, the path: "*" setup in HTTP will be invalid.
     http2:
       - path: /
         handler: fileServer
         args: /var/www/rayfantasy
       - path: /vmess
         handler: proxyPass
-        # 目前只支持目标接受 h2c
+        # Currently, only targets accepting h2c are supported.
         args: h2c://localhost:40002
 
-    # trojan: Trojan 协议流量处理方式
+    # trojan: Handling method for Trojan protocol traffic
     trojan:
       handler: proxyPass
       args: 127.0.0.1:4430
 
-    # default: 其他流量处理方式
+    # default: Handling method for other traffic
     default:
 
-      # handler: proxyPass 将流量转发至另一个地址
+      # handler: proxyPass will forward traffic to another address
       handler: proxyPass
 
-      # args: 转发的目标地址
+      # args: Target address for forwarding
       args: 127.0.0.1:40001
 
-      # args: 支持通过 Proxy Protocol 将源地址向后端传抵，目前仅支持 v1
+      # args: Supports passing the source address to the backend through Proxy Protocol, currently only supports v1
       # args: 127.0.0.1:40001;proxyProtocol
 
-      # args: 也可以使用 domain socket
+      # args: You can also use a domain socket
       # args: unix:/path/to/ds/file
 
   - name: trojan.example.com
 
-    # tlsoffloading: 解开 tls，false 为不解开，直接处理 tls 流量，适用于 trojan-gfw 等
+    # tlsoffloading: Unload TLS, false to not unload, directly handle TLS traffic, suitable for Trojan-GFW, etc.
     tlsoffloading: false
 
-    # default: 关闭 tlsoffloading 时，目前没有识别方法，均按其他流量处理
+    # default: When tlsoffloading is disabled, there are currently no recognition methods, and all are handled as other traffic.
     default:
       handler: proxyPass
       args: 127.0.0.1:8443
+
 ```
 </details>
 
-## 故障排查和常见问题
+## Troubleshooting and Common Issues
+1. If the service fails to start, use the command `sudo setcap "cap_net_bind_service=+ep" /usr/local/bin/tls-shunt-proxy` to grant the tls-shunt-proxy capability to bind to network services, then run `sudo -u tls-shunt-proxy /usr/local/bin/tls-shunt-proxy -config /etc/tls-shunt-proxy/config.yaml` to obtain error information.
 
-1. service 启动失败，请使用命令 `sudo setcap "cap_net_bind_service=+ep" /usr/local/bin/tls-shunt-proxy` 给 tls-shunt-proxy 赋予 CAP_NET_BIND_SERVICE 的 capability ，然后 `sudo -u tls-shunt-proxy /usr/local/bin/tls-shunt-proxy -config /etc/tls-shunt-proxy/config.yaml` 运行，获取错误信息
-
-2. `fail to load tls key pair for xxx.xxx: open /xxx/xxx.key: permission denied` 确保用户 `tls-shunt-proxy` 有权读取证书
+2. `fail to load tls key pair for xxx.xxx: open /xxx/xxx.key: permission denied` Ensure the user `tls-shunt-proxy` has permission to read the certificate.

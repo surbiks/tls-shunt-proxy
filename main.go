@@ -10,16 +10,15 @@ import (
 
 	"github.com/amirdaaee/tls-shunt-proxy/config"
 	"github.com/amirdaaee/tls-shunt-proxy/handler"
+	chshare "github.com/amirdaaee/tls-shunt-proxy/share"
 	"github.com/amirdaaee/tls-shunt-proxy/sniffer"
 	"github.com/stevenjohnstone/sni"
 )
 
-const version = "0.8.1"
-
 var conf config.Config
 
 func main() {
-	fmt.Println("tls-shunt-proxy version", version)
+	fmt.Println("tls-shunt-proxy version", chshare.BuildVersion)
 
 	configPath := flag.String("config", "./config.yaml", "Path to config file")
 	flag.Parse()
